@@ -15,17 +15,25 @@ function jacobian(f::Function,x)
 
     if k == 1
         e_i = oneunit(eltype(y))
+        ∂f = back(e_i)[1]
+        if ∂f === nothing
+            return y, fill!(J,0)
+        end
         if n == 1
-            J = back(e_i)[1]
+            J = ∂f
         else
-            J[1,:] = back(e_i)[1]
+            J[1,:] = ∂f
         end
         return y, J
     end
 
     for i = 1:k
         e_i[i] = oneunit(eltype(y))
-        J[i,:] .= back(e_i)[1]
+        ∂f = back(e_i)[1]
+        if ∂f === nothing
+            ∂f = zeros(J[i,:])
+        end
+        J[i,:] .= ∂f
         e_i[i] = zero(eltype(y))
     end
     return y, J
