@@ -6,7 +6,7 @@ using LinearAlgebra
 export run_and_propagate
 export propagate
 
-function jacobian(f:Function,x)
+function jacobian(f::Function,x)
     y,back = Zygote.pullback(f,x)
     k = length(y)
     n = length(x)
@@ -31,7 +31,7 @@ function jacobian(f:Function,x)
     return y, J
 end
 
-function propagate(f:Function,x::Number,σx::Number)
+function propagate(f::Function,x::Number,σx::Number)
     y, J = jacobian(f,x)
     cov = Diagonal([σx]).^2
     σy = sqrt.(diag(J * cov * J'))
@@ -41,14 +41,14 @@ function propagate(f:Function,x::Number,σx::Number)
     return σy
 end
 
-function propagate(f:Function,x::Array,σx::Array)
+function propagate(f::Function,x::Array,σx::Array)
     y, J = jacobian(f,x)
     cov = Diagonal(σx).^2
     σy = sqrt.(diag(J * cov * J'))
     return σy
 end
 
-function run_and_propagate(f:Function,x::Array,σx::Array)
+function run_and_propagate(f::Function,x::Array,σx::Array)
     y, J = jacobian(f,x)
     cov = Diagonal(σx).^2
     σy = sqrt.(diag(J * cov * J'))
@@ -58,7 +58,7 @@ function run_and_propagate(f:Function,x::Array,σx::Array)
     return y, σy
 end
 
-function run_and_propagate(f:Function,x::Number,σx::Number)
+function run_and_propagate(f::Function,x::Number,σx::Number)
     y, J = jacobian(f,x)
     cov = Diagonal([σx]).^2
     σy = sqrt.(diag(J * cov * J'))
