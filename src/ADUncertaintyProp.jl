@@ -3,47 +3,36 @@ module ADUncertaintyProp
 import Zygote
 using LinearAlgebra
 
-export jacobian
+export run_and_propagate
 export propagate
 
-function jacobian(f, x)
-    y = f(x)
-    n = length(y)
-    m = length(x)
-    T = eltype(y)
-    j = Array{T, 2}(undef, n, m)
-    for i in 1:n
-        j[i, :] .= Zygote.gradient(x -> f(x)[i], x)[1]
+function jacobian(f:Function,x)
+    y,back = Zygote.pullback(f,x)
+    k = length(y)
+    n = length(x)
+    J  = Matrix{eltype(y)}(undef,k,n)
+    e_i = zero(y)
+
+    if k == 1
+        e_i = oneunit(eltype(y))
+        if n == 1
+            J = back(e_i)[1]
+        else
+            J[1,:] = back(e_i)[1]
+        end
+        return y, J
     end
-    return j
+
+    for i = 1:k
+        e_i[i] = oneunit(eltype(y))
+        J[i,:] .= back(e_i)[1]
+        e_i[i] = zero(eltype(y))
+    end
+    return y, J
 end
 
-# function jacobian(f,x::Array)
-#     y,back  = Zygote.pullback(f,x)
-#     k  = length(y)
-#     n  = length(x)
-#     J  = Matrix{eltype(y)}(undef,k,n)
-#     e_i = zero(x)
-#     for i = 1:k
-#         e_i[i] = oneunit(eltype(x))
-#         J[i,:] = back(e_i)[1]
-#         e_i[i] = zero(eltype(x))
-#     end
-#     J
-# end
-
-
-# if length(y) > 1
-#     J = jacobian(f,x)
-#     cov = Diagonal(σx)
-#     σy = J * cov * J'
-# else
-
-# ∂f = Zygote.gradient(f,x)
-# σy = (sqrt(sum((reduce(vcat,∂f).*reduce(vcat,σx)).^2)))
-
-function propagate(f,x::Number,σx::Number)
-    J = jacobian(f,x)
+function propagate(f:Function,x::Number,σx::Number)
+    y, J = jacobian(f,x)
     cov = Diagonal([σx]).^2
     σy = sqrt.(diag(J * cov * J'))
     if length(σy) == 1
@@ -52,12 +41,31 @@ function propagate(f,x::Number,σx::Number)
     return σy
 end
 
-function propagate(f,x::Array,σx::Array)
-    J = jacobian(f,x)
+function propagate(f:Function,x::Array,σx::Array)
+    y, J = jacobian(f,x)
     cov = Diagonal(σx).^2
     σy = sqrt.(diag(J * cov * J'))
     return σy
 end
 
+function run_and_propagate(f:Function,x::Array,σx::Array)
+    y, J = jacobian(f,x)
+    cov = Diagonal(σx).^2
+    σy = sqrt.(diag(J * cov * J'))
+    if length(σy) == 1
+        σy = σy[1]
+    end
+    return y, σy
+end
+
+function run_and_propagate(f:Function,x::Number,σx::Number)
+    y, J = jacobian(f,x)
+    cov = Diagonal([σx]).^2
+    σy = sqrt.(diag(J * cov * J'))
+    if length(σy) == 1
+        σy = σy[1]
+    end
+    return y, σy
+end
 
 end # module

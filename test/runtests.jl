@@ -1,32 +1,44 @@
 using Test
 using ADUncertaintyProp
 
-function f(x)
-    sqrt(x)
+import Base.isapprox
+
+Base.isapprox(x::Tuple, y::Tuple; kws...) = isapprox(collect(x),collect(y);kws...)
+
+#module 1
+function h(x)
+    y = sum(x)
+    return y
 end
-x = 8
-∂x = 1/2*x^(-1/2)
-σx = 0.1
-σy = sqrt(∂x^2 * σx^2)
-@test propagate(f,x,σx) ≈ σy
 
 function g(x)
+    y = sqrt(sum(x .^2))
+    return y
+end
+
+function b(x)
+    return 2 .*x
+end
+
+function u(x)
     return vcat(2 .*x,-2 .*x)
 end
-x = 2
-σx = 0.1
-@test propagate(g,x,σx) ≈ [0.2,0.2]
 
-x = [2,3,4]
-σx = [0.2,0.3,0.4]
-@test propagate(g,x,σx) ≈ [0.4,0.6,0.8,0.4,0.6,0.8]
-
-function h(x)
-    return sum(x)
+#module 2
+function k(x)
+    y = sqrt.(x)
+    return y
 end
-x = [2,3,4]
-σx = [0.1,0.2,0.3]
-@test propagate(h,x,σx) ≈ sqrt(sum(σx.^2))
+
+function l(x)
+    return vcat(x[1]+x[2],x[3]+x[2])
+end
+
+function f(x)
+    t1 = k(x)
+    y = b(t1)
+    return y
+end
 
 function calc_iou(bboxes)
     bbox1 = bboxes[1:4]
@@ -44,11 +56,27 @@ function calc_iou(bboxes)
     return iou
 end
 
-bbox1 = [10,10,50,50]
-bbox2 = [9,11,47,54]
-σ_bbox1 = [1,3,2.5,5]
-σ_bbox2 = [0,0,0,0]
+@testset "All tests" begin
+    x = 8
+    σx = 0.2
+    @testset "Scalar tests" begin
+        @test run_and_propagate(k,x,σx) ≈ (k(x), 1/2*x^(-1/2)*σx)
+        @test run_and_propagate(b,x,σx) ≈ (b(x), 2*σx)
+        @test run_and_propagate(u,x,σx) ≈ (u(x), [2*σx,2*σx])
+        @test run_and_propagate(f,x,σx) ≈ (f(x), x^(-1/2)*σx)
+    end
 
-@show propagate(calc_iou,vcat(bbox1,bbox2),vcat(σ_bbox1,σ_bbox2))
+    x = [2,3,4]
+    σx = [0.2,0.3,0.4]
+    @testset "Vector tests" begin
+        @test run_and_propagate(h,x,σx) ≈ (h(x),sqrt(sum(σx .^2)))
+        @test run_and_propagate(u,x,σx) ≈ (u(x),vcat(2 .*σx,2 .*σx))
+        @test run_and_propagate(b,x,σx) ≈ (b(x), 2 .*σx)
+        @test run_and_propagate(k,x,σx) ≈ (k(x), 1/2 .*x.^(-1/2) .*σx)
+        @test run_and_propagate(l,x,σx) ≈ (l(x), sqrt.([σx[1]^2 + σx[2]^2,σx[2]^2 + σx[3]^2]))
+        @test run_and_propagate(f,x,σx) ≈ (f(x),  x .^(-1/2) .*σx)
+    end
+
+end
 
 
