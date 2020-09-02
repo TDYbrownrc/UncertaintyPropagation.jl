@@ -1,4 +1,4 @@
-module ADUncertaintyProp
+module UncertaintyPropagation
 
 import Zygote
 using LinearAlgebra
