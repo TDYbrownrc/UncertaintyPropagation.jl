@@ -1,5 +1,5 @@
 using Test
-using ADUncertaintyProp
+using UncertaintyPropagation
 
 import Base.isapprox
 
