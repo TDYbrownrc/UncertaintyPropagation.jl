@@ -74,9 +74,7 @@ end
         @test run_and_propagate(b,x,σx) ≈ (b(x), 2 .*σx)
         @test run_and_propagate(k,x,σx) ≈ (k(x), 1/2 .*x.^(-1/2) .*σx)
         @test run_and_propagate(l,x,σx) ≈ (l(x), sqrt.([σx[1]^2 + σx[2]^2,σx[2]^2 + σx[3]^2]))
-        # @test run_and_propagate(f,x,σx) ≈ (f(x),  x .^(-1/2) .*σx) #### Correct test
-        @test run_and_propagate(f,x,σx) ≈ (f(x)+1,  x .^(-1/2) .*σx) #### Incorrect test
-
+        @test run_and_propagate(f,x,σx) ≈ (f(x),  x .^(-1/2) .*σx)
     end
 
 end
