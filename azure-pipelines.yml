@@ -9,11 +9,15 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
-container: julia
+container:
+  image: julia
+  endpoint: DockerHub
 
 steps:
 
-- script: |
-    julia -e "using Pkg; Pkg.build(); end"
-    julia --check-bounds=yes -e "Pkg; Pkg.test(coverage=true); end"
+- task: CmdLine@2
+  inputs:
+    script: |
+      julia -e "using Pkg; Pkg.build(); end"
+      julia --check-bounds=yes -e "Pkg; Pkg.test(coverage=true); end"
   displayName: 'Run Julia unit tests'
