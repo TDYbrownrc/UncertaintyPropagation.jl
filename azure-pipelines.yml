@@ -1,0 +1,19 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+container: julia
+
+steps:
+
+- script: |
+    julia -e "using Pkg; Pkg.build(); end"
+    julia --check-bounds=yes -e "Pkg; Pkg.test(coverage=true); end"
+  displayName: 'Run Julia unit tests'
