@@ -18,6 +18,6 @@ steps:
 - task: CmdLine@2
   inputs:
     script: |
-      julia -e "using Pkg; Pkg.build(); end"
-      julia --check-bounds=yes -e "Pkg; Pkg.test(coverage=true); end"
+      julia -e "using Pkg; Pkg.build()"
+      julia --check-bounds=yes -e "Pkg; Pkg.test(coverage=true)"
   displayName: 'Run Julia unit tests'
