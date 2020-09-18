@@ -3,7 +3,7 @@ using UncertaintyPropagation
 
 import Base.isapprox
 
-Base.isapprox(x::Tuple, y::Tuple; kws...) = isapprox(collect(x),collect(y);kws...)
+Base.isapprox(x::NamedTuple, y::NamedTuple; kws...) = isapprox(collect(x),collect(y);kws...)
 
 #module 1
 function h(x)
@@ -60,21 +60,21 @@ end
     x = 8
     σx = 0.2
     @testset "Scalar tests" begin
-        @test run_and_propagate(k,x,σx) ≈ (k(x), 1/2*x^(-1/2)*σx)
-        @test run_and_propagate(b,x,σx) ≈ (b(x), 2*σx)
-        @test run_and_propagate(u,x,σx) ≈ (u(x), [2*σx,2*σx])
-        @test run_and_propagate(f,x,σx) ≈ (f(x), x^(-1/2)*σx)
+        @test propagate(k,x,σx) ≈ (y=k(x), σy=1/2*x^(-1/2)*σx)
+        @test propagate(b,x,σx) ≈ (y=b(x), σy=2*σx)
+        @test propagate(u,x,σx) ≈ (y=u(x), σy=[2*σx,2*σx])
+        @test propagate(f,x,σx) ≈ (y=f(x), σy=x^(-1/2)*σx)
     end
 
     x = [2,3,4]
     σx = [0.2,0.3,0.4]
     @testset "Vector tests" begin
-        @test run_and_propagate(h,x,σx) ≈ (h(x),sqrt(sum(σx .^2)))
-        @test run_and_propagate(u,x,σx) ≈ (u(x),vcat(2 .*σx,2 .*σx))
-        @test run_and_propagate(b,x,σx) ≈ (b(x), 2 .*σx)
-        @test run_and_propagate(k,x,σx) ≈ (k(x), 1/2 .*x.^(-1/2) .*σx)
-        @test run_and_propagate(l,x,σx) ≈ (l(x), sqrt.([σx[1]^2 + σx[2]^2,σx[2]^2 + σx[3]^2]))
-        @test run_and_propagate(f,x,σx) ≈ (f(x),  x .^(-1/2) .*σx)
+        @test propagate(h,x,σx) ≈ (y=h(x),σy=sqrt(sum(σx .^2)))
+        @test propagate(u,x,σx) ≈ (y=u(x),σy=vcat(2 .*σx,2 .*σx))
+        @test propagate(b,x,σx) ≈ (y=b(x), σy=2 .*σx)
+        @test propagate(k,x,σx) ≈ (y=k(x), σy=1/2 .*x.^(-1/2) .*σx)
+        @test propagate(l,x,σx) ≈ (y=l(x), σy=sqrt.([σx[1]^2 + σx[2]^2,σx[2]^2 + σx[3]^2]))
+        @test propagate(f,x,σx) ≈ (y=f(x),  σy=x .^(-1/2) .*σx)
     end
 
 end

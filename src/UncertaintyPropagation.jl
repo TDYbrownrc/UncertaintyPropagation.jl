@@ -7,10 +7,8 @@ module UncertaintyPropagation
 import Zygote
 using LinearAlgebra
 
-# run_and_propagate is the main entrypoint into this module
-export run_and_propagate
-
-# propagate is also exposed to enable returning just the propagated uncertainty
+# The propagate function is the main entrypoint into this module, accepting a function and paired inputs/uncertainties
+# and returning a NamedTuple of the outputs and paired propagated uncertainties
 export propagate
 
 # the jacobian function is the main workhorse of the module. 
@@ -84,7 +82,8 @@ function propagate(f::Function,x::Number,σx::Number)
         # convert length 1 array to scalar value
         σy = σy[1]
     end
-    return σy
+    #return a named tuple
+    return (y =y, σy=σy)
 end
 
 # Propagation function (array-array)
@@ -93,32 +92,10 @@ function propagate(f::Function,x::Array,σx::Array)
     y, J = jacobian(f,x)
     cov = Diagonal(σx).^2
     σy = sqrt.(diag(J * cov * J'))
-    return σy
-end
-
-# run_and_propagate returns both the output value (y) of the function f and the propagated uncertainty (σy)
-# (array-array)
-# see comments in propagate(f::Function, x::Number, σx::Number) for line-by-line explanation
-function run_and_propagate(f::Function,x::Array,σx::Array)
-    y, J = jacobian(f,x)
-    cov = Diagonal(σx).^2
-    σy = sqrt.(diag(J * cov * J'))
     if length(σy) == 1
         σy = σy[1]
     end
-    return y, σy
-end
-
-# run_and_propagate function (scalar-scalar)
-# see comments in propagate(f::Function, x::Number, σx::Number) for line-by-line explanation
-function run_and_propagate(f::Function,x::Number,σx::Number)
-    y, J = jacobian(f,x)
-    cov = Diagonal([σx]).^2
-    σy = sqrt.(diag(J * cov * J'))
-    if length(σy) == 1
-        σy = σy[1]
-    end
-    return y, σy
+    return (y=y, σy=σy)
 end
 
 end # module
