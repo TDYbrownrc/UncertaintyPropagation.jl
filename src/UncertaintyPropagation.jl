@@ -83,7 +83,7 @@ function propagate(f::Function,x::Number,σx::Number)
         σy = σy[1]
     end
     #return a named tuple
-    return (y =y, σy=σy)
+    return (result=y, uncertainty=σy)
 end
 
 # Propagation function (array-array)
@@ -95,7 +95,7 @@ function propagate(f::Function,x::Array,σx::Array)
     if length(σy) == 1
         σy = σy[1]
     end
-    return (y=y, σy=σy)
+    return (result=y, uncertainty=σy)
 end
 
 end # module
