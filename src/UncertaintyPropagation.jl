@@ -99,3 +99,5 @@ function propagate(f::Function,x::Array,σx::Array)
 end
 
 end # module
+
+# This code was developed through partial support by the Defense Advanced Research Projects Agency (DARPA), Lifelong Learning Machines, Contract No. FA8650-18-C-7831
