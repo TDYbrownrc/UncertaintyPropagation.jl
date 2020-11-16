@@ -11,6 +11,9 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
+variables:
+  group: MirroringPATs
+
 stages:
   - stage: Test
     jobs:
