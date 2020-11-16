@@ -12,7 +12,7 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  group: MirroringPATs
+  - group: MirroringPATs
 
 stages:
   - stage: Test
